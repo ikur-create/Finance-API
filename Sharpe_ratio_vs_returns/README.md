@@ -1,4 +1,4 @@
-# Yahoo Finance Risk Dashboard
+# Sharpe ratio vs Annnual returns plotted
 
 A concise portfolio project demonstrating data collection, metric computation, and visualization for S&P 500 equities using Python.
 
@@ -58,4 +58,5 @@ The script prints progress to the terminal while fetching data. The final plot i
 This repository is provided for portfolio/demo purposes. For questions or collaboration, contact: [ikergom.hkim@gmail.com].
 
 ---
+
 
