@@ -1,12 +1,7 @@
 # Monte Carlo Gold — Simulación de Regímenes del Oro
-
-> Modelo de simulación estocástica aplicado al precio del oro, basado en distribución empírica de retornos históricos reales con soporte para fat tails.
-
----
-
 ## ¿Qué hace este proyecto?
 
-Este modelo descarga datos históricos reales del precio del oro, analiza su distribución estadística y simula miles de trayectorias futuras posibles usando **Monte Carlo por bootstrap no paramétrico**.
+Este modelo de simulación estocástica descarga datos históricos reales del precio del oro, analiza su distribución empírica y simula miles de trayectorias futuras posibles usando **Monte Carlo por bootstrap no paramétrico**, con soporte para fat tails.
 
 A diferencia de los modelos clásicos que asumen distribución normal, este enfoque **resamplea directamente los retornos históricos observados**, capturando automáticamente:
 
