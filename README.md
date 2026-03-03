@@ -6,10 +6,10 @@ A personal collection of Python projects exploring financial data and quantitati
 
 ## 🗂️ Projects
 
-### [Monte Carlo Gold](./Monte_Carlo_Gold/)
+### [Monte Carlo Gold]
 Simulates thousands of possible future price paths for gold using real historical data and bootstrap resampling — no normal distribution assumptions, fat tails included.
 
-### [S&P 500 Risk Dashboard](./Yahoo_Finance_Risk_Dashboard/)
+### [S&P 500 Risk Dashboard]
 Fetches live data for all S&P 500 constituents and plots Sharpe ratio vs. annualised return, with bubble size proportional to market cap.
 
 ---
