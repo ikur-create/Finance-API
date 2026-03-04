@@ -8,31 +8,54 @@ import numpy as np
 
 def fetch_and_save_sp500():
     url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+    
     try:
+        print("Fetching S&P 500 companies list from Wikipedia...")
+        # Fetch the page with proper headers
         resp = requests.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
+        
+        # Parse the HTML response
+        from io import StringIO
+        tables = pd.read_html(StringIO(resp.text))
+        print(f"Tablas encontradas: {len(tables)}")
 
-        # 1. Leemos la tabla completa
-        table = pd.read_html(resp.text)[0]
-
-        # 2. Limpiamos los símbolos para yfinance (opcional, pero útil)
-        table['Symbol'] = table['Symbol'].astype(str).str.replace('.', '-', regex=False)
-
-        # 3. GUARDAR EN ARCHIVO DE TEXTO
-        with open('sp500_info.txt', 'w', encoding='utf-8') as f:
-            f.write("LISTADO COMPLETO S&P 500 - WIKIPEDIA\n")
-            f.write("=" * 50 + "\n\n")
-            f.write(table.to_string(index=False))
-
-        print("¡Hecho! Se ha creado el archivo 'sp500_info.txt' con toda la información.")
-
-        # Retornamos la lista de símbolos por si la necesitas luego
-        return table['Symbol'].tolist()
+        # La tabla del S&P 500 es usualmente la primera tabla principal
+        if not tables:
+            print("No se encontró ninguna tabla")
+            return []
+            
+        table = tables[0]
+        print(f"Tabla seleccionada con columnas: {table.columns.tolist()}")
+        
+        # Obtener la columna de símbolos (primer nombre de columna que contenga 'symbol' o 'ticker')
+        symbol_col = None
+        for col in table.columns:
+            col_str = str(col).lower()
+            if 'symbol' in col_str or 'ticker' in col_str:
+                symbol_col = col
+                break
+        
+        if symbol_col is None:
+            # Si no hay columna clara, usar la primera columna
+            print("Usando primera columna como símbolo")
+            symbol_col = table.columns[0]
+            
+        print(f"Usando columna '{symbol_col}' para extraer símbolos")
+        table[symbol_col] = table[symbol_col].astype(str).str.replace('.', '-', regex=False)
+        tickers = table[symbol_col].tolist()
+        
+        # Limpiar NaN valores
+        tickers = [t for t in tickers if pd.notna(t) and t.upper() != 'NAN']
+        
+        print(f"Tickers encontrados: {len(tickers)}")
+        return tickers
 
     except Exception as e:
         print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -54,7 +77,11 @@ def fetch_ticker_metrics(sym):
         vol = returns.std() * np.sqrt(252)
         sharpe = avg_return / vol if vol != 0 else 0
 
-        print(f"  ✓ {sym}: market_cap={market_cap:,}  return={avg_return:.2%}  sharpe={sharpe:.2f}")
+        try:
+            print(f"  OK {sym}: market_cap={market_cap:,}  return={avg_return:.2%}  sharpe={sharpe:.2f}")
+        except:
+            # In case of encoding issues, use a simpler format
+            print(f"  OK {sym}: sharpe={sharpe:.2f}")
 
         return {
             'symbol': sym,
@@ -63,7 +90,10 @@ def fetch_ticker_metrics(sym):
             'sharpe_ratio': sharpe,
         }
     except Exception as e:
-        print(f"  - Error fetching {sym}: {e}")
+        try:
+            print(f"  - Error fetching {sym}: {str(e)[:50]}")
+        except:
+            print(f"  - Error fetching {sym}")
         return None
 
 
