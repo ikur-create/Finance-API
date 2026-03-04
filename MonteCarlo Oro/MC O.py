@@ -26,7 +26,7 @@ def descargar_datos(ticker="GC=F", start="2010-01-01", end=None):
     """
     print(f"📥 Descargando datos de {ticker}...")
     df = yf.download(ticker, start=start, end=end, auto_adjust=True, progress=False)
-    df = df["Close"].dropna()
+    df = df["Close"].squeeze().dropna()  # squeeze() colapsa cualquier dimensión extra
     df.name = "Precio"
     print(f"   ✅ {len(df)} sesiones descargadas ({df.index[0].date()} → {df.index[-1].date()})")
     return df
@@ -44,7 +44,7 @@ def calcular_retornos(precios):
 
 def estadisticas(retornos):
     """Estadísticas descriptivas completas."""
-    r = retornos.values
+    r = retornos.values.flatten()
     media       = np.mean(r)
     std         = np.std(r, ddof=1)
     skewness    = float(stats.skew(r))
@@ -143,7 +143,7 @@ def resumen_final(matriz_precios, precio_inicial):
 
 def plot_todo(precios_hist, retornos, df_umbrales, matriz_mc, df_pct, horizonte):
     fig = plt.figure(figsize=(18, 14), facecolor="#0f172a")
-    fig.suptitle("Monte Carlo — Simulación de Regímenes del Oro",
+    fig.suptitle("🥇 Monte Carlo — Simulación de Regímenes del Oro",
                  fontsize=17, color="white", fontweight="bold", y=0.98)
 
     gs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.45, wspace=0.35)
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     df_umbrales = analizar_umbrales(retornos)
 
     # 3. Simulación
-    precio_hoy = float(precios.iloc[-1])
+    precio_hoy = float(precios.iloc[-1].item() if hasattr(precios.iloc[-1], 'item') else precios.iloc[-1])
     print(f"\n🚀 Simulando {N_SIMULACIONES:,} trayectorias × {HORIZONTE_DIAS} días "
           f"desde ${precio_hoy:,.2f}...")
 
